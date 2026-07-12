@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KB Entrenamiento — Pequeños hábitos, grandes cambios</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ---- Hero ---- */
+    .hero {
+      min-height: calc(100vh - var(--nav-height));
+      background: linear-gradient(135deg, #EEF4EF 0%, #FCF0F5 50%, #F3F0F8 100%);
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 600px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: white; border: 1.5px solid var(--beige); border-radius: 99px; padding: 8px 18px; font-size: 0.85rem; font-weight: 700; color: var(--text-light); margin-bottom: 28px; }
+    .hero h1 { margin-bottom: 20px; }
+    .hero h1 em { font-style: italic; color: var(--rose); }
+    .hero > .container > .hero-content > p { font-size: 1.15rem; margin-bottom: 36px; max-width: 480px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 32px; margin-top: 48px; }
+    .hero-stat strong { display: block; font-size: 1.8rem; font-family: var(--font-heading); color: var(--green-dark); }
+    .hero-stat span { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    .hero-bg-shape {
+      position: absolute; right: -60px; top: 50%; transform: translateY(-50%);
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(200,134,158,0.18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-bg-leaves {
+      position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+      font-size: 220px; opacity: 0.07; pointer-events: none; user-select: none;
+    }
+
+    /* ---- Classes Overview ---- */
+    .classes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .class-card {
+      background: var(--white); border-radius: var(--radius-md); padding: 28px 20px;
+      text-align: center; box-shadow: var(--shadow-sm); transition: all 0.25s;
+      cursor: pointer; border: 2px solid transparent;
+    }
+    .class-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--green-light); }
+    .class-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .class-card h4 { font-size: 1rem; margin-bottom: 6px; }
+    .class-card p  { font-size: 0.82rem; }
+
+    /* ---- Why Section ---- */
+    .why-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+    .why-card { text-align: center; padding: 36px 24px; }
+    .why-icon { width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 20px; }
+
+    /* ---- KB Club Section ---- */
+    .kb-club {
+      background: linear-gradient(135deg, #2C3E2D 0%, #3D5A3E 100%);
+      color: var(--white); position: relative; overflow: hidden;
+    }
+    .kb-club-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .kb-club h2 { color: var(--white); }
+    .kb-club h2 em { color: var(--rose-light); font-style: italic; }
+    .kb-club p { color: rgba(255,255,255,0.75); }
+    .kb-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+    .kb-pillar { background: rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: flex-start; gap: 12px; }
+    .kb-pillar-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .kb-pillar h5 { color: var(--white); font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .kb-pillar p  { color: rgba(255,255,255,0.6); font-size: 0.8rem; }
+    .kb-plan { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-md); padding: 28px; }
+    .kb-plan h3 { color: var(--white); margin-bottom: 24px; }
+    .kb-steps { display: flex; flex-direction: column; gap: 12px; }
+    .kb-step { display: flex; align-items: flex-start; gap: 14px; }
+    .kb-step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--rose); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kb-step-text h5 { color: var(--white); font-size: 0.9rem; font-weight: 700; }
+    .kb-step-text p  { color: rgba(255,255,255,0.6); font-size: 0.8rem; }
+
+    /* ---- Pricing ---- */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; align-items: start; }
+    .pricing-card { background: var(--white); border-radius: var(--radius-lg); padding: 36px 28px; box-shadow: var(--shadow-sm); position: relative; border: 2px solid transparent; transition: all 0.25s; }
+    .pricing-card:hover { box-shadow: var(--shadow-md); }
+    .pricing-card.featured { border-color: var(--green); box-shadow: var(--shadow-md); }
+    .pricing-card.featured::before { content: 'Más elegido ♥'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; padding: 4px 18px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .pricing-name { font-weight: 800; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .pricing-price { font-family: var(--font-heading); font-size: 2.8rem; color: var(--text); margin-bottom: 4px; }
+    .pricing-price sup { font-size: 1.2rem; vertical-align: super; }
+    .pricing-period { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .pricing-features { border-top: 1px solid var(--beige); padding-top: 20px; margin-bottom: 28px; }
+    .pricing-features li { padding: 8px 0; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--cream); }
+    .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 800; }
+    .pricing-note { font-size: 0.75rem; text-align: center; color: var(--text-muted); margin-top: 12px; }
+
+    /* ---- Testimonials ---- */
+    .testimonials { background: var(--green-bg); }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .testimonial-card { background: var(--white); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm); }
+    .testimonial-text { font-style: italic; margin-bottom: 20px; position: relative; padding-left: 20px; }
+    .testimonial-text::before { content: '"'; position: absolute; left: 0; top: -8px; font-size: 2.5rem; font-family: var(--font-heading); color: var(--rose-light); line-height: 1; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--rose)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; }
+    .testimonial-name { font-weight: 700; font-size: 0.9rem; }
+    .testimonial-meta { font-size: 0.8rem; color: var(--text-muted); }
+    .stars { color: #F9A825; font-size: 0.85rem; margin-bottom: 4px; }
+
+    /* ---- CTA ---- */
+    .cta-section {
+      background: linear-gradient(135deg, var(--rose-bg), var(--lavender-bg));
+      text-align: center; padding: 80px 0;
+    }
+    .cta-section h2 { margin-bottom: 16px; }
+    .cta-section p  { margin-bottom: 36px; font-size: 1.05rem; }
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    @media (max-width: 900px) {
+      .kb-club-inner  { grid-template-columns: 1fr; }
+      .pricing-grid   { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+      .why-grid       { grid-template-columns: 1fr 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero-bg-leaves { display: none; }
+      .why-grid       { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">🌿</div>
+      <span class="nav-logo-text">KB <span>Entrenamiento</span></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="active">Inicio</a>
+      <a href="clases.html">Clases</a>
+      <a href="index.html#kb-club">KB Club</a>
+      <a href="index.html#precios">Precios</a>
+      <a href="index.html#contacto">Contacto</a>
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-outline btn-sm" id="navLoginBtn">Ingresar</a>
+      <a href="login.html#registro" class="btn btn-secondary btn-sm">Suscribirse</a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-tag">🌿 Quilmes Oeste</div>
+      <h1>Pequeños hábitos,<br><em>grandes cambios.</em></h1>
+      <p>Una comunidad que te acompaña a crear hábitos saludables simples, para que te sientas mejor todos los días.</p>
+      <div class="hero-actions">
+        <a href="login.html#registro" class="btn btn-primary btn-lg">Empezar ahora</a>
+        <a href="clases.html" class="btn btn-outline btn-lg">Ver clases</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong id="statAlumnos">—</strong>
+          <span>Alumnos activos</span>
+        </div>
+        <div class="hero-stat">
+          <strong>6</strong>
+          <span>Tipos de clases</span>
+        </div>
+        <div class="hero-stat">
+          <strong>7 días</strong>
+          <span>Plataforma 24/7</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-bg-shape"></div>
+  <div class="hero-bg-leaves">🌿</div>
+</section>
+
+<!-- CLASES -->
+<section class="section" id="clases">
+  <div class="container text-center">
+    <div class="section-tag">Actividades</div>
+    <h2 class="section-title">Nuestras clases</h2>
+    <p class="section-subtitle">Elegí la actividad que más te motive. Cada clase está diseñada para que disfrutes el proceso.</p>
+    <div class="classes-grid">
+      <div class="class-card" onclick="window.location.href='clases.html'">
+        <div class="class-icon">💪</div>
+        <h4>Funcional</h4>
+        <p>Entrenamiento grupal de alta intensidad</p>
+      </div>
+      <div class="class-card" onclick="window.location.href='clases.html'">
+        <div class="class-icon">🧘</div>
+        <h4>Yoga / Pilates</h4>
+        <p>Flexibilidad, fuerza y relajación</p>
+      </div>
+      <div class="class-card" onclick="window.location.href='clases.html'">
+        <div class="class-icon">🏃</div>
+        <h4>Running</h4>
+        <p>Salidas grupales y técnica de carrera</p>
+      </div>
+      <div class="class-card" onclick="window.location.href='clases.html'">
+        <div class="class-icon">🧒</div>
+        <h4>Funcional Kids</h4>
+        <p>Movimiento y juego para los más chicos</p>
+      </div>
+      <div class="class-card" onclick="window.location.href='clases.html'">
+        <div class="class-icon">💃</div>
+        <h4>Zumba</h4>
+        <p>Bailá y quemá calorías divirtiéndote</p>
+      </div>
+      <div class="class-card" onclick="window.location.href='clases.html'">
+        <div class="class-icon">👴</div>
+        <h4>Tercera Edad</h4>
+        <p>Movilidad y bienestar a tu ritmo</p>
+      </div>
+    </div>
+    <div style="margin-top:40px;">
+      <a href="clases.html" class="btn btn-primary">Ver horarios y reservar</a>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUÉ KB -->
+<section class="section" style="background: var(--rose-bg);">
+  <div class="container text-center">
+    <div class="section-tag rose">Por qué elegirnos</div>
+    <h2 class="section-title">Más que un gimnasio,<br>una comunidad</h2>
+    <p class="section-subtitle">Te acompañamos en cada paso para que crear hábitos saludables sea simple y duradero.</p>
+    <div class="why-grid">
+      <div class="card why-card">
+        <div class="why-icon" style="background: var(--green-bg);">📱</div>
+        <h4>Reservas online</h4>
+        <p>Reservá tu lugar en segundos desde el celular. Sin llamadas, sin listas de espera.</p>
+      </div>
+      <div class="card why-card">
+        <div class="why-icon" style="background: var(--rose-bg);">🔔</div>
+        <h4>Recordatorios automáticos</h4>
+        <p>Te avisamos antes de que venza tu cuota o tu apto físico. Nada se te pasa.</p>
+      </div>
+      <div class="card why-card">
+        <div class="why-icon" style="background: var(--lavender-bg);">👥</div>
+        <h4>Comunidad real</h4>
+        <p>Desafíos grupales, charlas en vivo y una red de personas que se apoyan mutuamente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KB CLUB DE BIENESTAR -->
+<section class="section kb-club" id="kb-club">
+  <div class="container">
+    <div class="kb-club-inner">
+      <div>
+        <div class="section-tag" style="background: rgba(200,134,158,0.2); color: var(--rose-light);">♥ KB Club de Bienestar</div>
+        <h2 style="margin-bottom:16px;">Una <em>experiencia</em><br>de bienestar completa</h2>
+        <p style="margin-bottom:28px;">Mucho más que clases. El KB Club es una comunidad que te acompaña a crear hábitos saludables simples, para que te sientas mejor todos los días.</p>
+        <div class="kb-pillars">
+          <div class="kb-pillar">
+            <span class="kb-pillar-icon">🏋️</span>
+            <div>
+              <h5>Movimiento</h5>
+              <p>Rutinas, movilidad y desafíos</p>
+            </div>
+          </div>
+          <div class="kb-pillar">
+            <span class="kb-pillar-icon">🥗</span>
+            <div>
+              <h5>Alimentación</h5>
+              <p>Recetas fáciles y meal planner</p>
+            </div>
+          </div>
+          <div class="kb-pillar">
+            <span class="kb-pillar-icon">😴</span>
+            <div>
+              <h5>Descanso</h5>
+              <p>Meditaciones y múscia relajante</p>
+            </div>
+          </div>
+          <div class="kb-pillar">
+            <span class="kb-pillar-icon">🧠</span>
+            <div>
+              <h5>Bienestar mental</h5>
+              <p>Manejo del estrés y motivación</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:32px;">
+          <a href="login.html#registro" class="btn btn-secondary btn-lg">Unirme al club ♥</a>
+        </div>
+      </div>
+      <div class="kb-plan">
+        <h3>Plan de crecimiento<br>6 meses, grandes pasos</h3>
+        <div class="kb-steps">
+          <div class="kb-step">
+            <div class="kb-step-num">1</div>
+            <div class="kb-step-text">
+              <h5>Mes 1 — Construcción</h5>
+              <p>Definimos metas y establecemos la base. Meta: 100 interesados.</p>
+            </div>
+          </div>
+          <div class="kb-step">
+            <div class="kb-step-num">2</div>
+            <div class="kb-step-text">
+              <h5>Mes 2 — Lanzamiento</h5>
+              <p>Abrimos el club con primeros 30-50 socios.</p>
+            </div>
+          </div>
+          <div class="kb-step">
+            <div class="kb-step-num">3</div>
+            <div class="kb-step-text">
+              <h5>Mes 3 — Consolidación</h5>
+              <p>Más contenido, recetas y charlas en vivo. Meta: 100 socios.</p>
+            </div>
+          </div>
+          <div class="kb-step">
+            <div class="kb-step-num">4</div>
+            <div class="kb-step-text">
+              <h5>Mes 4-6 — Escalar</h5>
+              <p>Embajadoras, lanzamiento online y 250-400+ socios.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRECIOS -->
+<section class="section" id="precios">
+  <div class="container text-center">
+    <div class="section-tag">Membresías</div>
+    <h2 class="section-title">Planes de membresía</h2>
+    <p class="section-subtitle">Elegí el plan que mejor se adapta a vos. Todos incluyen acceso completo a las clases y la plataforma.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Plan Mensual</div>
+        <div class="pricing-price"><sup>$</sup>9.900<span style="font-size:1rem; color: var(--text-muted);">/mes</span></div>
+        <div class="pricing-period">Se renueva cada mes</div>
+        <ul class="pricing-features">
+          <li>Acceso a la plataforma</li>
+          <li>Todas las clases incluidas</li>
+          <li>Comunidad privada</li>
+          <li>Recursos descargables</li>
+        </ul>
+        <a href="login.html#registro" class="btn btn-outline" style="width:100%; justify-content:center;">Empezar</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-name">Plan Trimestral</div>
+        <div class="pricing-price"><sup>$</sup>26.900<span style="font-size:1rem; color: var(--text-muted);">/3 meses</span></div>
+        <div class="pricing-period">Ahorrás 10% · <span style="color:var(--green-dark); font-weight:700;">$8.967/mes</span></div>
+        <ul class="pricing-features">
+          <li>Todo el plan mensual</li>
+          <li>+1 cuadernillo de regalo</li>
+          <li>10% de descuento</li>
+          <li>Prioridad en reservas</li>
+        </ul>
+        <a href="login.html#registro" class="btn btn-primary" style="width:100%; justify-content:center;">Empezar</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-name">Plan Anual</div>
+        <div class="pricing-price"><sup>$</sup>99.000<span style="font-size:1rem; color: var(--text-muted);">/año</span></div>
+        <div class="pricing-period">Ahorrás 20% · <span style="color:var(--green-dark); font-weight:700;">$8.250/mes</span></div>
+        <ul class="pricing-features">
+          <li>Todo el plan mensual</li>
+          <li>+3 cuadernillos de regalo</li>
+          <li>20% de descuento</li>
+          <li>Acceso a contenido exclusivo</li>
+        </ul>
+        <a href="login.html#registro" class="btn btn-outline" style="width:100%; justify-content:center;">Empezar</a>
+      </div>
+    </div>
+    <p class="pricing-note" style="margin-top:16px;">*Precios de lanzamiento por tiempo limitado.</p>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials">
+  <div class="container text-center">
+    <div class="section-tag">Comunidad</div>
+    <h2 class="section-title">Lo que dicen nuestras alumnas</h2>
+    <p class="section-subtitle" style="margin-bottom:48px;">Somos una comunidad que se elige todos los días.</p>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Empecé sin saber nada de rutinas y hoy no me imagino mi semana sin las clases. La profe es increíble y el ambiente te da ganas de volver siempre.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">S</div>
+          <div>
+            <div class="testimonial-name">Sofía M.</div>
+            <div class="testimonial-meta">Alumna hace 8 meses · Funcional</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Lo que más me gusta es poder reservar desde el celu. Nunca más me quedé sin lugar. Y los recordatorios de cuota son un salvavidas.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">V</div>
+          <div>
+            <div class="testimonial-name">Valentina G.</div>
+            <div class="testimonial-meta">Alumna hace 5 meses · Yoga</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Anoté a mi mamá en la clase de Tercera Edad y está encantada. Es un grupo muy cálido y las clases son perfectas para ella.</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">L</div>
+          <div>
+            <div class="testimonial-name">Laura P.</div>
+            <div class="testimonial-meta">Alumna hace 3 meses · Tercera Edad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section" id="contacto">
+  <div class="container">
+    <div class="section-tag rose">¿Lista para empezar?</div>
+    <h2>Transformá tu vida<br>hoy mismo ✨</h2>
+    <p>No estás sola. Estamos para acompañarte en cada paso.</p>
+    <div class="cta-actions">
+      <a href="login.html#registro" class="btn btn-primary btn-lg">Registrarme gratis</a>
+      <a href="https://wa.me/5491127995649" target="_blank" class="btn btn-outline btn-lg">📱 Escribinos por WhatsApp</a>
+    </div>
+    <div style="margin-top:48px; display:flex; gap:32px; justify-content:center; align-items:center; flex-wrap:wrap;">
+      <span style="color:var(--text-muted); font-size:0.9rem;">📍 Roque Sáenz Peña 1218, Quilmes Oeste</span>
+      <span style="color:var(--text-muted); font-size:0.9rem;">📷 @kb.entrenamiento</span>
+      <span style="color:var(--text-muted); font-size:0.9rem;">📱 11 2799 5649</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <div class="nav-logo-icon">🌿</div>
+          <span class="nav-logo-text" style="color:white;">KB <span>Entrenamiento</span></span>
+        </div>
+        <p>Pequeños hábitos, grandes cambios. Una comunidad para sentirte mejor todos los días.</p>
+        <div class="social-links" style="margin-top:16px;">
+          <a href="https://www.instagram.com/kb.entrenamiento" target="_blank" title="Instagram">📷</a>
+          <a href="https://wa.me/5491127995649" target="_blank" title="WhatsApp">💬</a>
+        </div>
+      </div>
+      <div>
+        <h5>Clases</h5>
+        <ul>
+          <li><a href="clases.html">Funcional</a></li>
+          <li><a href="clases.html">Yoga / Pilates</a></li>
+          <li><a href="clases.html">Running</a></li>
+          <li><a href="clases.html">Funcional Kids</a></li>
+          <li><a href="clases.html">Zumba</a></li>
+          <li><a href="clases.html">Tercera Edad</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Comunidad</h5>
+        <ul>
+          <li><a href="index.html#kb-club">KB Club de Bienestar</a></li>
+          <li><a href="index.html#precios">Planes y precios</a></li>
+          <li><a href="perfil.html">Mi perfil</a></li>
+          <li><a href="clases.html">Reservar clases</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contacto</h5>
+        <ul>
+          <li><a href="#">📍 Roque Sáenz Peña 1218, Quilmes Oeste</a></li>
+          <li><a href="https://wa.me/5491127995649">📱 11 2799 5649</a></li>
+          <li><a href="#">📷 @kb.entrenamiento</a></li>
+          <li><a href="admin.html">🔐 Administración</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 KB Entrenamiento. Todos los derechos reservados.</span>
+      <span>Hecho con ♥ en Quilmes</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+  // Toggle mobile menu
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+
+  // Update nav if user is logged in
+  async function updateNav() {
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        document.getElementById('navLoginBtn').textContent = 'Mi perfil';
+        document.getElementById('navLoginBtn').href = 'perfil.html';
+      }
+    } catch(e) {}
+  }
+
+  // Load student count from Supabase
+  async function loadStats() {
+    try {
+      const { count } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_admin', false);
+      if (count) document.getElementById('statAlumnos').textContent = count + '+';
+    } catch(e) {}
+  }
+
+  updateNav();
+  loadStats();
+</script>
+</body>
+</html>

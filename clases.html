@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clases y Reservas — KB Entrenamiento</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .filter-bar {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 20px 24px; box-shadow: var(--shadow-sm);
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+      margin-bottom: 32px;
+    }
+    .filter-label { font-weight: 700; font-size: 0.85rem; color: var(--text-muted); margin-right: 4px; }
+    .filter-btn {
+      padding: 6px 16px; border-radius: 99px; border: 1.5px solid var(--beige);
+      background: var(--cream); cursor: pointer; font-family: var(--font-body);
+      font-size: 0.85rem; font-weight: 600; color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--green-bg); border-color: var(--green); color: var(--green-dark);
+    }
+    .week-nav {
+      display: flex; align-items: center; gap: 16px; margin-left: auto;
+    }
+    .week-nav button {
+      width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--beige);
+      background: var(--cream); cursor: pointer; font-size: 1rem; display: flex;
+      align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .week-nav button:hover { background: var(--green-bg); border-color: var(--green); }
+    .week-nav span { font-weight: 700; font-size: 0.9rem; color: var(--text-light); }
+
+    /* Schedule grid */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+    }
+    .day-column { display: flex; flex-direction: column; gap: 8px; }
+    .day-header {
+      text-align: center; padding: 12px 8px;
+      background: var(--white); border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+    }
+    .day-name { font-weight: 800; font-size: 0.85rem; color: var(--text); }
+    .day-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .day-header.today { background: var(--green); }
+    .day-header.today .day-name, .day-header.today .day-date { color: var(--white); }
+
+    .class-slot {
+      background: var(--white); border-radius: var(--radius-sm);
+      padding: 12px 10px; box-shadow: var(--shadow-sm);
+      cursor: pointer; transition: all 0.2s;
+      border-left: 3px solid var(--green);
+      position: relative;
+    }
+    .class-slot:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .class-slot.full { opacity: 0.6; cursor: not-allowed; border-left-color: var(--text-muted); }
+    .class-slot.reserved { background: var(--green-bg); border-left-color: var(--green-dark); }
+    .class-slot-time { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    .class-slot-name { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .class-slot-spots { font-size: 0.72rem; color: var(--text-muted); }
+    .class-slot .reserved-badge {
+      position: absolute; top: 6px; right: 6px;
+      width: 18px; height: 18px; background: var(--green); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; color: white; font-weight: 700;
+    }
+    .class-slot-border-yoga    { border-left-color: var(--lavender); }
+    .class-slot-border-running { border-left-color: #E07B40; }
+    .class-slot-border-kids    { border-left-color: var(--rose); }
+    .class-slot-border-zumba   { border-left-color: #D4A017; }
+    .class-slot-border-tercera { border-left-color: var(--beige-dark); }
+
+    /* My reservations panel */
+    .my-res-panel {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 28px; box-shadow: var(--shadow-sm); margin-top: 40px;
+    }
+    .my-res-panel h3 { margin-bottom: 20px; }
+    .res-list { display: flex; flex-direction: column; gap: 10px; }
+    .res-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; background: var(--cream); border-radius: var(--radius-sm);
+    }
+    .res-item-info { display: flex; align-items: center; gap: 12px; }
+    .res-item-icon { font-size: 1.4rem; }
+    .res-item-name { font-weight: 700; font-size: 0.9rem; }
+    .res-item-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Booking modal */
+    .modal-class-header { background: var(--green-bg); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px; }
+    .modal-class-header h4 { margin-bottom: 4px; }
+    .modal-detail { display: flex; gap: 8px; font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; flex-wrap: wrap; }
+    .spots-bar { background: var(--cream); border-radius: 99px; height: 8px; margin: 12px 0 4px; overflow: hidden; }
+    .spots-fill { background: var(--green); height: 100%; border-radius: 99px; transition: width 0.4s; }
+    .spots-fill.medium { background: #F9A825; }
+    .spots-fill.low    { background: #E53935; }
+
+    @media (max-width: 900px) {
+      .schedule-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .schedule-grid { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { flex-direction: column; align-items: flex-start; }
+      .week-nav { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">🌿</div>
+      <span class="nav-logo-text">KB <span>Entrenamiento</span></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Inicio</a>
+      <a href="clases.html" class="active">Clases</a>
+      <a href="index.html#kb-club">KB Club</a>
+      <a href="index.html#precios">Precios</a>
+    </div>
+    <div class="nav-actions" id="navActions">
+      <a href="login.html" class="btn btn-outline btn-sm">Ingresar</a>
+    </div>
+    <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <div class="section-tag">Horarios</div>
+    <h1>Clases y Reservas</h1>
+    <p>Reservá tu lugar en segundos. Cupos limitados por clase.</p>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<section class="section-sm">
+  <div class="container">
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Filtrar:</span>
+      <button class="filter-btn active" onclick="filterClass('all', this)">Todas</button>
+      <button class="filter-btn" onclick="filterClass('Funcional', this)">💪 Funcional</button>
+      <button class="filter-btn" onclick="filterClass('Yoga / Pilates', this)">🧘 Yoga/Pilates</button>
+      <button class="filter-btn" onclick="filterClass('Running', this)">🏃 Running</button>
+      <button class="filter-btn" onclick="filterClass('Funcional Kids', this)">🧒 Kids</button>
+      <button class="filter-btn" onclick="filterClass('Zumba', this)">💃 Zumba</button>
+      <button class="filter-btn" onclick="filterClass('Tercera Edad', this)">👴 3ra Edad</button>
+      <div class="week-nav">
+        <button onclick="changeWeek(-1)" title="Semana anterior">←</button>
+        <span id="weekLabel">Esta semana</span>
+        <button onclick="changeWeek(1)" title="Próxima semana">→</button>
+      </div>
+    </div>
+
+    <!-- Schedule Grid -->
+    <div id="scheduleContainer">
+      <div class="schedule-grid" id="scheduleGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Not logged in message -->
+    <div id="loginPrompt" class="alert alert-info" style="display:none; margin-top:24px;">
+      ℹ️ <span><a href="login.html" style="color:var(--lavender); font-weight:700;">Iniciá sesión</a> para reservar clases.</span>
+    </div>
+
+    <!-- My Reservations -->
+    <div class="my-res-panel" id="myResPanel" style="display:none;">
+      <h3>Mis reservas de esta semana</h3>
+      <div class="res-list" id="myResList">
+        <p style="color:var(--text-muted); font-size:0.9rem;">No tenés reservas esta semana.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- BOOKING MODAL -->
+<div class="modal-backdrop" id="bookingModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Reservar clase</h3>
+      <button class="modal-close" onclick="document.getElementById('bookingModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-class-header" id="modalClassHeader">
+      <h4 id="modalClassName">—</h4>
+      <div class="modal-detail" id="modalClassDetail"></div>
+      <div class="spots-bar"><div class="spots-fill" id="spotsBar" style="width:0%"></div></div>
+      <span id="spotsText" style="font-size:0.8rem; color:var(--text-muted);"></span>
+    </div>
+    <p id="modalMsg" style="font-size:0.9rem; margin-bottom:20px; color:var(--text-light);"></p>
+    <div style="display:flex; gap:12px;">
+      <button class="btn btn-outline" style="flex:1; justify-content:center;" onclick="document.getElementById('bookingModal').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1; justify-content:center;" id="confirmBookBtn" onclick="confirmBooking()">
+        <span id="confirmBtnText">Confirmar reserva</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+let currentUser     = null;
+let currentFilter   = 'all';
+let weekOffset      = 0;
+let allClasses      = [];
+let myReservations  = [];
+let selectedSlot    = null;
+
+const CLASS_BORDER = {
+  'Funcional':      '',
+  'Yoga / Pilates': 'class-slot-border-yoga',
+  'Running':        'class-slot-border-running',
+  'Funcional Kids': 'class-slot-border-kids',
+  'Zumba':          'class-slot-border-zumba',
+  'Tercera Edad':   'class-slot-border-tercera',
+};
+
+// Get week dates starting Monday
+function getWeekDates(offset = 0) {
+  const today = new Date();
+  const day   = today.getDay();
+  const diff  = (day === 0 ? -6 : 1 - day);
+  const mon   = new Date(today);
+  mon.setDate(today.getDate() + diff + (offset * 7));
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return d;
+  });
+}
+
+function formatWeekLabel(dates) {
+  const opts = { day: 'numeric', month: 'short' };
+  return `${dates[0].toLocaleDateString('es-AR', opts)} – ${dates[6].toLocaleDateString('es-AR', opts)}`;
+}
+
+async function init() {
+  currentUser = await getCurrentUser();
+
+  // Update nav
+  if (currentUser) {
+    document.getElementById('navActions').innerHTML = `
+      <a href="perfil.html" class="btn btn-outline btn-sm">Mi perfil</a>
+      <a href="clases.html" class="btn btn-secondary btn-sm">Mis reservas</a>`;
+    document.getElementById('myResPanel').style.display = 'block';
+  } else {
+    document.getElementById('loginPrompt').style.display = 'flex';
+  }
+
+  await loadClasses();
+  await loadMyReservations();
+  renderSchedule();
+}
+
+async function loadClasses() {
+  const { data, error } = await supabase
+    .from('classes')
+    .select('*, class_types(name, description)')
+    .eq('is_active', true)
+    .order('start_time');
+  if (!error) allClasses = data || [];
+}
+
+async function loadMyReservations() {
+  if (!currentUser) return;
+  const dates = getWeekDates(weekOffset);
+  const from  = dates[0].toISOString().split('T')[0];
+  const to    = dates[6].toISOString().split('T')[0];
+  const { data } = await supabase
+    .from('reservations')
+    .select('*, classes(*, class_types(name))')
+    .eq('user_id', currentUser.id)
+    .eq('status', 'confirmed')
+    .gte('reservation_date', from)
+    .lte('reservation_date', to);
+  myReservations = data || [];
+  renderMyReservations();
+}
+
+async function getReservationCounts() {
+  const dates = getWeekDates(weekOffset);
+  const from  = dates[0].toISOString().split('T')[0];
+  const to    = dates[6].toISOString().split('T')[0];
+  const { data } = await supabase
+    .from('reservations')
+    .select('class_id, reservation_date')
+    .eq('status', 'confirmed')
+    .gte('reservation_date', from)
+    .lte('reservation_date', to);
+
+  const counts = {};
+  (data || []).forEach(r => {
+    const key = `${r.class_id}_${r.reservation_date}`;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  return counts;
+}
+
+async function renderSchedule() {
+  const dates  = getWeekDates(weekOffset);
+  const today  = new Date().toISOString().split('T')[0];
+  const counts = await getReservationCounts();
+  const grid   = document.getElementById('scheduleGrid');
+
+  document.getElementById('weekLabel').textContent =
+    weekOffset === 0 ? 'Esta semana' :
+    weekOffset === 1 ? 'Próxima semana' :
+    formatWeekLabel(dates);
+
+  const filtered = currentFilter === 'all'
+    ? allClasses
+    : allClasses.filter(c => c.class_types?.name === currentFilter);
+
+  grid.innerHTML = '';
+
+  dates.forEach((date, i) => {
+    const dateStr = date.toISOString().split('T')[0];
+    const isToday = dateStr === today;
+    const dayClasses = filtered.filter(c => c.day_of_week === i);
+
+    const col = document.createElement('div');
+    col.className = 'day-column';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'day-header' + (isToday ? ' today' : '');
+    hdr.innerHTML = `
+      <div class="day-name">${DAYS[i]}</div>
+      <div class="day-date">${date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}</div>`;
+    col.appendChild(hdr);
+
+    if (dayClasses.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'text-align:center; padding:12px 0; font-size:0.75rem; color:var(--text-muted);';
+      empty.textContent = '—';
+      col.appendChild(empty);
+    }
+
+    dayClasses.forEach(cls => {
+      const key      = `${cls.id}_${dateStr}`;
+      const count    = counts[key] || 0;
+      const isFull   = count >= cls.capacity;
+      const reserved = myReservations.some(r => r.class_id === cls.id && r.reservation_date === dateStr);
+      const isPast   = date < new Date(new Date().setHours(0,0,0,0));
+      const borderCls = CLASS_BORDER[cls.class_types?.name] || '';
+      const name      = cls.class_types?.name || 'Clase';
+
+      const slot = document.createElement('div');
+      slot.className = `class-slot ${borderCls} ${isFull ? 'full' : ''} ${reserved ? 'reserved' : ''}`;
+      slot.innerHTML = `
+        ${reserved ? '<div class="reserved-badge">✓</div>' : ''}
+        <div class="class-slot-time">${cls.start_time?.slice(0,5)} – ${cls.end_time?.slice(0,5)}</div>
+        <div class="class-slot-name">${name}</div>
+        <div class="class-slot-spots">${isFull ? 'Clase llena' : `${cls.capacity - count} lugar${cls.capacity - count !== 1 ? 'es' : ''}`}</div>`;
+
+      if (!isPast) {
+        slot.onclick = () => openBookingModal(cls, dateStr, count, reserved);
+      } else {
+        slot.style.opacity = '0.45';
+        slot.style.cursor = 'default';
+      }
+
+      col.appendChild(slot);
+    });
+
+    grid.appendChild(col);
+  });
+}
+
+function renderMyReservations() {
+  const list = document.getElementById('myResList');
+  if (!myReservations.length) {
+    list.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No tenés reservas esta semana.</p>';
+    return;
+  }
+  const ICONS = { 'Funcional':'💪', 'Yoga / Pilates':'🧘', 'Running':'🏃', 'Funcional Kids':'🧒', 'Zumba':'💃', 'Tercera Edad':'👴' };
+  list.innerHTML = myReservations.map(r => {
+    const name = r.classes?.class_types?.name || 'Clase';
+    const icon = ICONS[name] || '🏋️';
+    const time = r.classes?.start_time?.slice(0,5);
+    const date = new Date(r.reservation_date + 'T12:00').toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+    return `<div class="res-item">
+      <div class="res-item-info">
+        <span class="res-item-icon">${icon}</span>
+        <div>
+          <div class="res-item-name">${name}</div>
+          <div class="res-item-meta">${date} · ${time}hs</div>
+        </div>
+      </div>
+      <button class="btn btn-sm" style="background:var(--rose-bg); color:var(--rose-dark); border:none;"
+        onclick="cancelReservation('${r.id}')">Cancelar</button>
+    </div>`;
+  }).join('');
+}
+
+function openBookingModal(cls, dateStr, count, isReserved) {
+  if (!currentUser) { window.location.href = 'login.html'; return; }
+  selectedSlot = { cls, dateStr, isReserved };
+  const avail = cls.capacity - count;
+  const name  = cls.class_types?.name || 'Clase';
+  const pct   = (count / cls.capacity) * 100;
+  const barCls = pct > 80 ? 'low' : pct > 50 ? 'medium' : '';
+
+  document.getElementById('modalTitle').textContent  = isReserved ? 'Cancelar reserva' : 'Reservar clase';
+  document.getElementById('modalClassName').textContent = name;
+  document.getElementById('modalClassDetail').innerHTML = `
+    <span>📅 ${new Date(dateStr + 'T12:00').toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' })}</span>
+    <span>🕐 ${cls.start_time?.slice(0,5)} – ${cls.end_time?.slice(0,5)}</span>
+    ${cls.instructor ? `<span>👩 ${cls.instructor}</span>` : ''}`;
+  document.getElementById('spotsBar').style.width   = pct + '%';
+  document.getElementById('spotsBar').className     = 'spots-fill ' + barCls;
+  document.getElementById('spotsText').textContent   = isReserved ? 'Ya reservaste esta clase' : `${avail} lugar${avail !== 1 ? 'es' : ''} disponible${avail !== 1 ? 's' : ''}`;
+  document.getElementById('modalMsg').textContent    = isReserved
+    ? '¿Querés cancelar tu reserva para esta clase?'
+    : `¿Confirmás tu reserva para ${name} el ${new Date(dateStr + 'T12:00').toLocaleDateString('es-AR', { weekday:'long' })}?`;
+  document.getElementById('confirmBtnText').textContent = isReserved ? 'Cancelar reserva' : 'Confirmar reserva';
+  const btn = document.getElementById('confirmBookBtn');
+  btn.className = isReserved ? 'btn btn-outline-rose' : 'btn btn-primary';
+  btn.style.flex = '1';
+  btn.style.justifyContent = 'center';
+
+  document.getElementById('bookingModal').classList.add('open');
+}
+
+async function confirmBooking() {
+  if (!selectedSlot) return;
+  const { cls, dateStr, isReserved } = selectedSlot;
+  const btn = document.getElementById('confirmBookBtn');
+  btn.disabled = true;
+  document.getElementById('confirmBtnText').textContent = isReserved ? 'Cancelando...' : 'Reservando...';
+
+  if (isReserved) {
+    const res = myReservations.find(r => r.class_id === cls.id && r.reservation_date === dateStr);
+    if (res) {
+      await supabase.from('reservations').update({ status: 'cancelled' }).eq('id', res.id);
+      showToast('Reserva cancelada', 'info');
+    }
+  } else {
+    await supabase.from('reservations').insert({
+      user_id:          currentUser.id,
+      class_id:         cls.id,
+      reservation_date: dateStr,
+      status:           'confirmed'
+    });
+    showToast('¡Reserva confirmada! 🎉', 'success');
+  }
+
+  document.getElementById('bookingModal').classList.remove('open');
+  btn.disabled = false;
+  await loadMyReservations();
+  await renderSchedule();
+}
+
+async function cancelReservation(resId) {
+  await supabase.from('reservations').update({ status: 'cancelled' }).eq('id', resId);
+  showToast('Reserva cancelada', 'info');
+  await loadMyReservations();
+  await renderSchedule();
+}
+
+function filterClass(cls, btn) {
+  currentFilter = cls;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSchedule();
+}
+
+async function changeWeek(dir) {
+  weekOffset += dir;
+  await loadMyReservations();
+  renderSchedule();
+}
+
+function closeModal(e) {
+  if (e.target.id === 'bookingModal') document.getElementById('bookingModal').classList.remove('open');
+}
+
+init();
+</script>
+</body>
+</html>

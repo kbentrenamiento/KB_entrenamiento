@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Perfil — KB Entrenamiento</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .profile-layout {
+      display: grid; grid-template-columns: 280px 1fr; gap: 28px;
+      align-items: start;
+    }
+    .profile-sidebar {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 28px; box-shadow: var(--shadow-sm); text-align: center;
+    }
+    .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--rose));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: white; margin: 0 auto 16px; font-weight: 700;
+    }
+    .profile-name { font-family: var(--font-heading); font-size: 1.3rem; margin-bottom: 4px; }
+    .profile-email { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+    .profile-sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      font-weight: 600; font-size: 0.9rem; color: var(--text-light);
+      transition: all 0.2s; margin-bottom: 4px;
+    }
+    .profile-sidebar nav a:hover, .profile-sidebar nav a.active {
+      background: var(--green-bg); color: var(--green-dark);
+    }
+    .profile-sidebar nav a.danger:hover { background: #FFEBEE; color: #C62828; }
+    .sidebar-divider { border: none; border-top: 1px solid var(--cream); margin: 16px 0; }
+
+    .profile-main { display: flex; flex-direction: column; gap: 24px; }
+
+    .status-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .status-card {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 20px 24px; box-shadow: var(--shadow-sm);
+    }
+    .status-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .status-card-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .status-card-value { font-family: var(--font-heading); font-size: 1.5rem; color: var(--text); margin-bottom: 4px; }
+    .status-card-sub { font-size: 0.8rem; color: var(--text-muted); }
+    .status-card-icon { font-size: 1.8rem; }
+
+    .data-section { background: var(--white); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm); }
+    .data-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .data-section-header h3 { margin-bottom: 0; }
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .data-item label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .data-item span  { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+
+    .apto-card {
+      background: var(--white); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm);
+    }
+    .apto-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .apto-file-info { display: flex; align-items: center; gap: 12px; background: var(--cream); border-radius: var(--radius-sm); padding: 12px 16px; }
+    .apto-file-icon { font-size: 1.5rem; }
+    .apto-file-name { font-size: 0.85rem; font-weight: 700; }
+    .apto-file-date { font-size: 0.78rem; color: var(--text-muted); }
+
+    .res-upcoming {
+      background: var(--white); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm);
+    }
+
+    /* Edit mode */
+    .edit-mode-fields { display: none; }
+    .view-mode-fields { display: block; }
+    body.editing .edit-mode-fields { display: block; }
+    body.editing .view-mode-fields { display: none; }
+
+    @media (max-width: 900px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .profile-sidebar nav { display: flex; flex-wrap: wrap; gap: 4px; }
+      .profile-sidebar nav a { flex: 1; min-width: 140px; }
+    }
+    @media (max-width: 600px) {
+      .status-cards { grid-template-columns: 1fr; }
+      .data-grid    { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">🌿</div>
+      <span class="nav-logo-text">KB <span>Entrenamiento</span></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Inicio</a>
+      <a href="clases.html">Clases</a>
+      <a href="perfil.html" class="active">Mi perfil</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-outline btn-sm" onclick="handleLogout()">Salir</button>
+    </div>
+    <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="section-tag">Cuenta</div>
+    <h1>Mi Perfil</h1>
+    <p>Gestioná tus datos, reservas y estado de membresía.</p>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="profile-layout">
+
+      <!-- SIDEBAR -->
+      <div class="profile-sidebar">
+        <div class="avatar" id="avatarEl">?</div>
+        <div class="profile-name" id="sidebarName">Cargando...</div>
+        <div class="profile-email" id="sidebarEmail"></div>
+        <nav>
+          <a href="#datos" class="active">👤 Mis datos</a>
+          <a href="clases.html">📅 Reservar clases</a>
+          <a href="#apto">🏥 Apto físico</a>
+          <a href="#membresia">💳 Membresía</a>
+        </nav>
+        <hr class="sidebar-divider" />
+        <nav>
+          <a href="#" class="danger" onclick="handleLogout()">🚪 Cerrar sesión</a>
+        </nav>
+      </div>
+
+      <!-- MAIN -->
+      <div class="profile-main">
+
+        <!-- STATUS CARDS -->
+        <div class="status-cards">
+          <div class="status-card" id="cuotaCard">
+            <div class="status-card-header">
+              <div>
+                <div class="status-card-label">💳 Cuota</div>
+                <div class="status-card-value" id="cuotaStatus">—</div>
+                <div class="status-card-sub" id="cuotaSub"></div>
+              </div>
+              <span class="status-card-icon">💳</span>
+            </div>
+            <span class="badge" id="cuotaBadge">—</span>
+          </div>
+          <div class="status-card" id="aptoCard">
+            <div class="status-card-header">
+              <div>
+                <div class="status-card-label">🏥 Apto físico</div>
+                <div class="status-card-value" id="aptoStatus">—</div>
+                <div class="status-card-sub" id="aptoSub"></div>
+              </div>
+              <span class="status-card-icon">🏥</span>
+            </div>
+            <span class="badge" id="aptoBadge">—</span>
+          </div>
+        </div>
+
+        <!-- ALERTS -->
+        <div id="alertsContainer"></div>
+
+        <!-- DATOS PERSONALES -->
+        <div class="data-section" id="datos">
+          <div class="data-section-header">
+            <h3>Datos personales</h3>
+            <button class="btn btn-outline btn-sm" id="editBtn" onclick="toggleEdit()">✏️ Editar</button>
+          </div>
+
+          <!-- VIEW MODE -->
+          <div class="view-mode-fields data-grid" id="viewData">
+            <div class="data-item"><label>Nombre completo</label><span id="vNombre">—</span></div>
+            <div class="data-item"><label>DNI</label><span id="vDNI">—</span></div>
+            <div class="data-item"><label>Teléfono</label><span id="vTel">—</span></div>
+            <div class="data-item"><label>Fecha de nacimiento</label><span id="vNac">—</span></div>
+            <div class="data-item"><label>Dirección</label><span id="vDir">—</span></div>
+            <div class="data-item"><label>Contacto emergencia</label><span id="vEmerg">—</span></div>
+          </div>
+
+          <!-- EDIT MODE -->
+          <form class="edit-mode-fields" id="editForm" onsubmit="saveProfile(event)" style="display:none;">
+            <div class="form-row">
+              <div class="form-group"><label>Nombre</label><input type="text" id="eNombre" /></div>
+              <div class="form-group"><label>Apellido</label><input type="text" id="eApellido" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>DNI</label><input type="text" id="eDNI" /></div>
+              <div class="form-group"><label>Teléfono</label><input type="tel" id="eTel" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Fecha de nacimiento</label><input type="date" id="eNac" /></div>
+              <div class="form-group"><label>Dirección</label><input type="text" id="eDir" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Contacto emergencia</label><input type="text" id="eEmergN" /></div>
+              <div class="form-group"><label>Tel. emergencia</label><input type="tel" id="eEmergT" /></div>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:8px;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="toggleEdit()">Cancelar</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="saveBtn">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- APTO FÍSICO -->
+        <div class="apto-card" id="apto">
+          <div class="apto-header">
+            <h3>Apto físico</h3>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('newAptoInput').click()">📤 Actualizar</button>
+            <input type="file" id="newAptoInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="uploadNewApto(this)" />
+          </div>
+          <p style="font-size:0.9rem; margin-bottom:16px;">El apto físico tiene validez de <strong>1 año</strong>. Te avisaremos 30 días antes de que venza.</p>
+          <div id="aptoFileInfo">
+            <div class="apto-file-info">
+              <span class="apto-file-icon">📄</span>
+              <div>
+                <div class="apto-file-name" id="aptoFileName">Sin archivo subido</div>
+                <div class="apto-file-date" id="aptoFileDate"></div>
+              </div>
+              <a id="aptoFileLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="display:none; margin-left:auto;">Ver</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRÓXIMAS RESERVAS -->
+        <div class="res-upcoming" id="membresia">
+          <h3 style="margin-bottom:20px;">Próximas reservas</h3>
+          <div id="upcomingList">
+            <p style="color:var(--text-muted); font-size:0.9rem;">Cargando reservas...</p>
+          </div>
+          <div style="margin-top:20px;">
+            <a href="clases.html" class="btn btn-primary">+ Reservar una clase</a>
+          </div>
+        </div>
+
+      </div><!-- /profile-main -->
+    </div><!-- /profile-layout -->
+  </div>
+</section>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+let userProfile = null;
+let editing = false;
+
+async function init() {
+  const user = await requireAuth('login.html');
+  if (!user) return;
+
+  userProfile = await getUserProfile(user.id);
+  if (!userProfile) { showToast('Error al cargar el perfil', 'error'); return; }
+
+  renderProfile(user);
+  renderStatusCards();
+  renderAlerts();
+  await loadUpcomingReservations(user.id);
+}
+
+function renderProfile(user) {
+  const name = userProfile.full_name || user.email;
+  const initials = name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('avatarEl').textContent = initials;
+  document.getElementById('sidebarName').textContent  = name;
+  document.getElementById('sidebarEmail').textContent = user.email;
+
+  const parts = (userProfile.full_name || '').split(' ');
+  document.getElementById('vNombre').textContent = userProfile.full_name || '—';
+  document.getElementById('vDNI').textContent    = userProfile.dni || '—';
+  document.getElementById('vTel').textContent    = userProfile.phone || '—';
+  document.getElementById('vNac').textContent    = formatDate(userProfile.birth_date);
+  document.getElementById('vDir').textContent    = userProfile.address || '—';
+  const emerg = [userProfile.emergency_contact, userProfile.emergency_phone].filter(Boolean).join(' · ');
+  document.getElementById('vEmerg').textContent  = emerg || '—';
+
+  // Edit fields
+  const nombre = parts.slice(0, -1).join(' ') || parts[0] || '';
+  const apellido = parts.length > 1 ? parts[parts.length - 1] : '';
+  document.getElementById('eNombre').value  = nombre;
+  document.getElementById('eApellido').value = apellido;
+  document.getElementById('eDNI').value     = userProfile.dni || '';
+  document.getElementById('eTel').value     = userProfile.phone || '';
+  document.getElementById('eNac').value     = userProfile.birth_date || '';
+  document.getElementById('eDir').value     = userProfile.address || '';
+  document.getElementById('eEmergN').value  = userProfile.emergency_contact || '';
+  document.getElementById('eEmergT').value  = userProfile.emergency_phone || '';
+
+  // Apto
+  document.getElementById('aptoFileName').textContent = userProfile.apto_fisico_url ? '📎 Certificado médico' : 'Sin archivo subido';
+  document.getElementById('aptoFileDate').textContent = userProfile.apto_fisico_date ? 'Fecha: ' + formatDate(userProfile.apto_fisico_date) : '';
+  const link = document.getElementById('aptoFileLink');
+  if (userProfile.apto_fisico_url) {
+    link.href = userProfile.apto_fisico_url;
+    link.style.display = 'inline-flex';
+  }
+}
+
+function renderStatusCards() {
+  // Cuota
+  const memEnd = userProfile.membership_end;
+  const cuotaDays = daysUntil(memEnd);
+  const cuotaInfo = getStatusInfo(cuotaDays);
+  document.getElementById('cuotaStatus').textContent = memEnd ? formatDate(memEnd) : 'Sin fecha';
+  document.getElementById('cuotaSub').textContent    = cuotaDays !== null ? (cuotaDays < 0 ? 'Vencida' : `Vence en ${cuotaDays} días`) : 'Sin datos';
+  const cuotaBadgeEl = document.getElementById('cuotaBadge');
+  cuotaBadgeEl.textContent = cuotaInfo.label;
+  cuotaBadgeEl.className   = 'badge ' + cuotaInfo.cls;
+
+  // Apto
+  if (userProfile.apto_fisico_date) {
+    const aptoEnd  = new Date(userProfile.apto_fisico_date);
+    aptoEnd.setFullYear(aptoEnd.getFullYear() + 1);
+    const aptoEndStr = aptoEnd.toISOString().split('T')[0];
+    const aptoDays   = daysUntil(aptoEndStr);
+    const aptoInfo   = getStatusInfo(aptoDays);
+    document.getElementById('aptoStatus').textContent = 'Vence: ' + formatDate(aptoEndStr);
+    document.getElementById('aptoSub').textContent    = aptoDays !== null ? (aptoDays < 0 ? 'Vencido' : `En ${aptoDays} días`) : '';
+    const aptoBadge = document.getElementById('aptoBadge');
+    aptoBadge.textContent = aptoInfo.label;
+    aptoBadge.className   = 'badge ' + aptoInfo.cls;
+  } else {
+    document.getElementById('aptoStatus').textContent = 'Sin registrar';
+    document.getElementById('aptoSub').textContent    = 'Subí tu certificado';
+    document.getElementById('aptoBadge').textContent  = 'Requerido';
+    document.getElementById('aptoBadge').className    = 'badge badge-red';
+  }
+}
+
+function renderAlerts() {
+  const container = document.getElementById('alertsContainer');
+  const alerts = [];
+
+  // Cuota alerts
+  const memEnd = userProfile.membership_end;
+  if (memEnd) {
+    const days = daysUntil(memEnd);
+    if (days !== null && days < 0)
+      alerts.push({ type: 'danger',  msg: `⚠️ Tu cuota venció el ${formatDate(memEnd)}. Contactá a la administración para renovar.` });
+    else if (days !== null && days <= 15)
+      alerts.push({ type: 'warning', msg: `🔔 Tu cuota vence en ${days} días (${formatDate(memEnd)}). ¡Renovála antes de que expire!` });
+  }
+
+  // Apto alerts
+  if (userProfile.apto_fisico_date) {
+    const aptoEnd = new Date(userProfile.apto_fisico_date);
+    aptoEnd.setFullYear(aptoEnd.getFullYear() + 1);
+    const days = daysUntil(aptoEnd.toISOString().split('T')[0]);
+    if (days !== null && days < 0)
+      alerts.push({ type: 'danger',  msg: `⚠️ Tu apto físico venció. Necesitás un nuevo certificado médico para continuar entrenando.` });
+    else if (days !== null && days <= 30)
+      alerts.push({ type: 'warning', msg: `🏥 Tu apto físico vence en ${days} días. Pedile el certificado a tu médico.` });
+  } else {
+    alerts.push({ type: 'info', msg: 'ℹ️ No tenés apto físico registrado. Subí tu certificado médico para poder tomar clases.' });
+  }
+
+  container.innerHTML = alerts.map(a => `<div class="alert alert-${a.type}">${a.msg}</div>`).join('');
+}
+
+async function loadUpcomingReservations(userId) {
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await supabase
+    .from('reservations')
+    .select('*, classes(start_time, end_time, class_types(name))')
+    .eq('user_id', userId)
+    .eq('status', 'confirmed')
+    .gte('reservation_date', today)
+    .order('reservation_date')
+    .limit(5);
+
+  const list = document.getElementById('upcomingList');
+  if (!data || !data.length) {
+    list.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No tenés reservas próximas.</p>';
+    return;
+  }
+  const ICONS = { 'Funcional':'💪', 'Yoga / Pilates':'🧘', 'Running':'🏃', 'Funcional Kids':'🧒', 'Zumba':'💃', 'Tercera Edad':'👴' };
+  list.innerHTML = data.map(r => {
+    const name = r.classes?.class_types?.name || 'Clase';
+    const icon = ICONS[name] || '🏋️';
+    const time = r.classes?.start_time?.slice(0,5);
+    const date = new Date(r.reservation_date + 'T12:00').toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+    return `<div style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--cream);">
+      <span style="font-size:1.4rem;">${icon}</span>
+      <div>
+        <div style="font-weight:700; font-size:0.9rem;">${name}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">${date} · ${time}hs</div>
+      </div>
+      <span class="badge badge-green" style="margin-left:auto;">Confirmada</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleEdit() {
+  editing = !editing;
+  document.getElementById('viewData').style.display  = editing ? 'none' : 'grid';
+  document.getElementById('editForm').style.display  = editing ? 'block' : 'none';
+  document.getElementById('editBtn').textContent = editing ? '✕ Cancelar' : '✏️ Editar';
+}
+
+async function saveProfile(e) {
+  e.preventDefault();
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+
+  const nombre   = document.getElementById('eNombre').value;
+  const apellido = document.getElementById('eApellido').value;
+
+  const { error } = await supabase.from('profiles').update({
+    full_name:         nombre + ' ' + apellido,
+    dni:               document.getElementById('eDNI').value,
+    phone:             document.getElementById('eTel').value,
+    birth_date:        document.getElementById('eNac').value || null,
+    address:           document.getElementById('eDir').value,
+    emergency_contact: document.getElementById('eEmergN').value,
+    emergency_phone:   document.getElementById('eEmergT').value,
+  }).eq('id', (await getCurrentUser()).id);
+
+  if (error) {
+    showToast('Error al guardar: ' + error.message, 'error');
+  } else {
+    showToast('Perfil actualizado 🌿', 'success');
+    userProfile = await getUserProfile((await getCurrentUser()).id);
+    renderProfile(await getCurrentUser());
+    toggleEdit();
+  }
+  btn.textContent = 'Guardar cambios';
+  btn.disabled = false;
+}
+
+async function uploadNewApto(input) {
+  if (!input.files[0]) return;
+  const file = input.files[0];
+  const user = await getCurrentUser();
+  const ext  = file.name.split('.').pop();
+  const path = `aptos/${user.id}/apto.${ext}`;
+
+  showToast('Subiendo certificado...', 'info');
+
+  const { error: upErr } = await supabase.storage.from('aptos').upload(path, file, { upsert: true });
+  if (upErr) { showToast('Error al subir: ' + upErr.message, 'error'); return; }
+
+  const { data: urlData } = supabase.storage.from('aptos').getPublicUrl(path);
+  const today = new Date().toISOString().split('T')[0];
+
+  await supabase.from('profiles').update({
+    apto_fisico_url:  urlData.publicUrl,
+    apto_fisico_date: today
+  }).eq('id', user.id);
+
+  showToast('Apto físico actualizado ✅', 'success');
+  userProfile = await getUserProfile(user.id);
+  renderProfile(user);
+  renderStatusCards();
+  renderAlerts();
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin — KB Entrenamiento</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - var(--nav-height)); }
+    .admin-sidebar {
+      background: #2C3E2D; padding: 28px 0;
+      position: sticky; top: var(--nav-height); height: calc(100vh - var(--nav-height)); overflow-y: auto;
+    }
+    .admin-sidebar-logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+    .admin-sidebar-logo .nav-logo-text { color: white; font-size: 1rem; }
+    .admin-sidebar-label { padding: 4px 20px; font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-top: 16px; margin-bottom: 4px; }
+    .admin-nav a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px; font-weight: 600; font-size: 0.88rem;
+      color: rgba(255,255,255,0.65); transition: all 0.2s;
+    }
+    .admin-nav a:hover, .admin-nav a.active { background: rgba(255,255,255,0.1); color: white; }
+    .admin-nav a.active { border-left: 3px solid var(--green-light); }
+
+    .admin-main { padding: 32px; background: var(--cream); }
+    .admin-header { margin-bottom: 28px; }
+    .admin-header h2 { margin-bottom: 4px; }
+    .admin-header p  { font-size: 0.9rem; }
+
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .kpi-card { background: var(--white); border-radius: var(--radius-md); padding: 20px 24px; box-shadow: var(--shadow-sm); }
+    .kpi-label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .kpi-value { font-family: var(--font-heading); font-size: 2rem; color: var(--text); }
+    .kpi-sub   { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .kpi-icon  { float: right; font-size: 1.8rem; margin-top: -4px; }
+
+    /* Tables */
+    .admin-table-card { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 28px; }
+    .admin-table-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--cream); }
+    .admin-table-header h3 { margin: 0; font-size: 1.1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 10px 16px; text-align: left; font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; background: var(--cream); border-bottom: 1px solid var(--beige); }
+    td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid var(--cream); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--cream); }
+    .td-name { font-weight: 700; }
+    .td-email { color: var(--text-muted); font-size: 0.82rem; }
+
+    /* Search */
+    .search-input {
+      padding: 8px 14px; border: 1.5px solid var(--beige); border-radius: 99px;
+      font-family: var(--font-body); font-size: 0.88rem; outline: none; width: 220px;
+    }
+    .search-input:focus { border-color: var(--green); }
+
+    /* Tabs */
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--white); padding: 6px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); width: fit-content; }
+    .admin-tab { padding: 8px 18px; border-radius: var(--radius-sm); border: none; background: none; cursor: pointer; font-family: var(--font-body); font-weight: 600; font-size: 0.88rem; color: var(--text-muted); transition: all 0.2s; }
+    .admin-tab.active { background: var(--green); color: white; }
+
+    /* Class management */
+    .classes-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .class-manage-card {
+      background: var(--cream); border-radius: var(--radius-sm); padding: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .class-manage-info h5 { font-size: 0.9rem; margin-bottom: 2px; }
+    .class-manage-info p  { font-size: 0.78rem; color: var(--text-muted); }
+    .class-manage-actions { display: flex; gap: 6px; }
+
+    /* Panel sections */
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+
+    /* Payment status change */
+    select.payment-select {
+      border: 1.5px solid var(--beige); border-radius: 6px; padding: 4px 8px;
+      font-family: var(--font-body); font-size: 0.82rem; cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .admin-layout { grid-template-columns: 1fr; }
+      .admin-sidebar { position: static; height: auto; display: flex; flex-wrap: wrap; padding: 12px; }
+      .admin-sidebar-logo { display: none; }
+      .admin-sidebar-label { display: none; }
+      .admin-nav { display: flex; flex-wrap: wrap; }
+      .admin-nav a { border-radius: 99px; border-left: none !important; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .classes-list { grid-template-columns: 1fr; }
+      .admin-main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">🌿</div>
+      <span class="nav-logo-text">KB <span>Admin</span></span>
+    </a>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span id="adminName" style="font-size:0.88rem; color:var(--text-muted); font-weight:600;"></span>
+      <button class="btn btn-outline btn-sm" onclick="handleLogout()">Salir</button>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <div class="admin-sidebar">
+    <div class="admin-sidebar-logo">
+      <div class="nav-logo">
+        <div class="nav-logo-icon">🌿</div>
+        <span class="nav-logo-text">KB <span style="color:var(--rose-light);">Admin</span></span>
+      </div>
+    </div>
+    <div class="admin-sidebar-label">Panel</div>
+    <nav class="admin-nav">
+      <a href="#" class="active" onclick="showPanel('dashboard', this)">📊 Dashboard</a>
+      <a href="#" onclick="showPanel('alumnos', this)">👥 Alumnos</a>
+      <a href="#" onclick="showPanel('clases', this)">📅 Clases</a>
+      <a href="#" onclick="showPanel('cobros', this)">💳 Cobros</a>
+    </nav>
+    <div class="admin-sidebar-label">Acciones</div>
+    <nav class="admin-nav">
+      <a href="index.html" target="_blank">🌐 Ver sitio</a>
+      <a href="#" onclick="handleLogout()" style="color: rgba(255,100,100,0.7);">🚪 Cerrar sesión</a>
+    </nav>
+  </div>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="admin-panel active" id="panel-dashboard">
+      <div class="admin-header">
+        <h2>Dashboard</h2>
+        <p id="dashDate"></p>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-label">Alumnos activos</div>
+          <div class="kpi-value" id="kpiAlumnos">—</div>
+          <div class="kpi-sub">Total registrados</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">💳</div>
+          <div class="kpi-label">Cuotas al día</div>
+          <div class="kpi-value" id="kpiPagados">—</div>
+          <div class="kpi-sub" id="kpiPagadosSub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">⚠️</div>
+          <div class="kpi-label">Cuotas pendientes</div>
+          <div class="kpi-value" id="kpiPendientes" style="color:var(--rose);">—</div>
+          <div class="kpi-sub">Requieren atención</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📅</div>
+          <div class="kpi-label">Reservas hoy</div>
+          <div class="kpi-value" id="kpiReservas">—</div>
+          <div class="kpi-sub">En todas las clases</div>
+        </div>
+      </div>
+
+      <!-- Reservas por clase hoy -->
+      <div class="admin-table-card">
+        <div class="admin-table-header">
+          <h3>Clases de hoy</h3>
+          <span id="todayDate" style="font-size:0.85rem; color:var(--text-muted);"></span>
+        </div>
+        <table>
+          <thead><tr><th>Clase</th><th>Horario</th><th>Inscriptos</th><th>Cupo</th><th>Disponibles</th></tr></thead>
+          <tbody id="todayClassesBody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Alertas -->
+      <div class="admin-table-card">
+        <div class="admin-table-header"><h3>🔔 Alertas</h3></div>
+        <div id="adminAlerts" style="padding:20px;">
+          <p style="color:var(--text-muted); font-size:0.9rem;">Cargando alertas...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ALUMNOS ===== -->
+    <div class="admin-panel" id="panel-alumnos">
+      <div class="admin-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div><h2>Alumnos</h2><p>Todos los alumnos registrados</p></div>
+        <input type="text" class="search-input" placeholder="🔍 Buscar alumno..." oninput="filterAlumnos(this.value)" />
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="filterByStatus('all', this)">Todos</button>
+        <button class="admin-tab" onclick="filterByStatus('paid', this)">Al día</button>
+        <button class="admin-tab" onclick="filterByStatus('pending', this)">Pendiente</button>
+        <button class="admin-tab" onclick="filterByStatus('overdue', this)">Vencido</button>
+      </div>
+      <div class="admin-table-card">
+        <table>
+          <thead><tr><th>Alumno</th><th>Teléfono</th><th>Cuota</th><th>Apto físico</th><th>Acciones</th></tr></thead>
+          <tbody id="alumnosBody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== CLASES ===== -->
+    <div class="admin-panel" id="panel-clases">
+      <div class="admin-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div><h2>Gestión de clases</h2><p>Configurá horarios, cupos y tipos de clase</p></div>
+        <button class="btn btn-primary btn-sm" onclick="openClassModal()">+ Nueva clase</button>
+      </div>
+      <div class="admin-table-card">
+        <div class="admin-table-header"><h3>Clases activas</h3></div>
+        <table>
+          <thead><tr><th>Tipo</th><th>Día</th><th>Horario</th><th>Instructor/a</th><th>Cupo</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="clasesBody">
+            <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== COBROS ===== -->
+    <div class="admin-panel" id="panel-cobros">
+      <div class="admin-header">
+        <h2>Estado de cobros</h2>
+        <p>Gestioná el estado de pago de cada alumno</p>
+      </div>
+      <div class="admin-table-card">
+        <div class="admin-table-header">
+          <h3>Todos los alumnos</h3>
+          <div style="display:flex; gap:8px; font-size:0.82rem; align-items:center;">
+            <span style="color:var(--text-muted);">Resumen:</span>
+            <span class="badge badge-green" id="cobSummary1">—</span>
+            <span class="badge badge-orange" id="cobSummary2">—</span>
+            <span class="badge badge-red" id="cobSummary3">—</span>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Alumno</th><th>Email</th><th>Membresía hasta</th><th>Estado de pago</th><th>Cambiar estado</th></tr></thead>
+          <tbody id="cobrosBody">
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /admin-main -->
+</div><!-- /admin-layout -->
+
+<!-- CLASS MODAL -->
+<div class="modal-backdrop" id="classModal" onclick="if(event.target.id==='classModal')closeClassModal()">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h3 id="classModalTitle">Nueva clase</h3>
+      <button class="modal-close" onclick="closeClassModal()">✕</button>
+    </div>
+    <form id="classForm" onsubmit="saveClass(event)">
+      <input type="hidden" id="classId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de clase</label>
+          <select id="classType" required>
+            <option value="">Seleccioná...</option>
+            <option>Funcional</option>
+            <option>Yoga / Pilates</option>
+            <option>Running</option>
+            <option>Funcional Kids</option>
+            <option>Zumba</option>
+            <option>Tercera Edad</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Día de la semana</label>
+          <select id="classDay" required>
+            <option value="">Seleccioná...</option>
+            <option value="0">Lunes</option>
+            <option value="1">Martes</option>
+            <option value="2">Miércoles</option>
+            <option value="3">Jueves</option>
+            <option value="4">Viernes</option>
+            <option value="5">Sábado</option>
+            <option value="6">Domingo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Hora inicio</label><input type="time" id="classStart" required /></div>
+        <div class="form-group"><label>Hora fin</label><input type="time" id="classEnd" required /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Instructor/a</label><input type="text" id="classInstructor" placeholder="Nombre del/la profe" /></div>
+        <div class="form-group"><label>Cupo máximo</label><input type="number" id="classCapacity" min="1" max="100" value="15" required /></div>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <button type="button" class="btn btn-outline" onclick="closeClassModal()" style="flex:1; justify-content:center;">Cancelar</button>
+        <button type="submit" class="btn btn-primary" style="flex:1; justify-content:center;" id="classSubmitBtn">Guardar clase</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+let allAlumnos    = [];
+let allAdminClases = [];
+let alumnosFilter = 'all';
+let alumnosSearch = '';
+
+async function init() {
+  const user = await requireAdmin();
+  if (!user) return;
+  const profile = await getUserProfile(user.id);
+  document.getElementById('adminName').textContent = profile?.full_name || user.email;
+
+  const today = new Date();
+  document.getElementById('dashDate').textContent = today.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('todayDate').textContent = today.toLocaleDateString('es-AR', { day:'numeric', month:'long' });
+
+  await Promise.all([loadAlumnos(), loadClases()]);
+  renderDashboard();
+  renderAlumnos();
+  renderClases();
+  renderCobros();
+}
+
+async function loadAlumnos() {
+  const { data } = await supabase.from('profiles').select('*').eq('is_admin', false).order('full_name');
+  allAlumnos = data || [];
+}
+
+async function loadClases() {
+  const { data } = await supabase.from('classes').select('*, class_types(name)').order('day_of_week').order('start_time');
+  allAdminClases = data || [];
+}
+
+async function renderDashboard() {
+  const total    = allAlumnos.length;
+  const paid     = allAlumnos.filter(a => a.payment_status === 'paid').length;
+  const pending  = allAlumnos.filter(a => a.payment_status !== 'paid').length;
+
+  document.getElementById('kpiAlumnos').textContent   = total;
+  document.getElementById('kpiPagados').textContent   = paid;
+  document.getElementById('kpiPagadosSub').textContent = `${pending} pendiente${pending !== 1 ? 's' : ''}`;
+  document.getElementById('kpiPendientes').textContent = pending;
+
+  // Reservations today
+  const today = new Date().toISOString().split('T')[0];
+  const dayOfWeek = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  const { count } = await supabase.from('reservations').select('*', { count:'exact', head:true }).eq('reservation_date', today).eq('status', 'confirmed');
+  document.getElementById('kpiReservas').textContent = count || 0;
+
+  // Today's classes
+  const todayClasses = allAdminClases.filter(c => c.day_of_week === dayOfWeek && c.is_active);
+  const tbody = document.getElementById('todayClassesBody');
+  if (!todayClasses.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">No hay clases hoy</td></tr>';
+  } else {
+    const counts = {};
+    if (todayClasses.length) {
+      const ids = todayClasses.map(c => c.id);
+      const { data: resData } = await supabase.from('reservations').select('class_id').in('class_id', ids).eq('reservation_date', today).eq('status', 'confirmed');
+      (resData || []).forEach(r => { counts[r.class_id] = (counts[r.class_id] || 0) + 1; });
+    }
+    tbody.innerHTML = todayClasses.map(c => {
+      const cnt   = counts[c.id] || 0;
+      const avail = c.capacity - cnt;
+      const pct   = Math.round(cnt / c.capacity * 100);
+      return `<tr>
+        <td>${getClassPill(c.class_types?.name || 'Clase')}</td>
+        <td>${c.start_time?.slice(0,5)} – ${c.end_time?.slice(0,5)}</td>
+        <td><strong>${cnt}</strong></td>
+        <td>${c.capacity}</td>
+        <td><span class="badge ${avail === 0 ? 'badge-red' : avail <= 3 ? 'badge-orange' : 'badge-green'}">${avail === 0 ? 'Llena' : avail + ' libre' + (avail !== 1 ? 's' : '')}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Alerts
+  const alerts = [];
+  allAlumnos.forEach(a => {
+    if (a.membership_end) {
+      const days = daysUntil(a.membership_end);
+      if (days !== null && days < 0)    alerts.push({ type:'danger',  msg:`💳 <strong>${a.full_name}</strong> tiene la cuota vencida.` });
+      else if (days !== null && days <= 7) alerts.push({ type:'warning', msg:`💳 <strong>${a.full_name}</strong> vence la cuota en ${days} días.` });
+    }
+    if (a.apto_fisico_date) {
+      const aptoEnd = new Date(a.apto_fisico_date);
+      aptoEnd.setFullYear(aptoEnd.getFullYear() + 1);
+      const days = daysUntil(aptoEnd.toISOString().split('T')[0]);
+      if (days !== null && days < 0)     alerts.push({ type:'danger',  msg:`🏥 <strong>${a.full_name}</strong> tiene el apto físico vencido.` });
+      else if (days !== null && days <= 14) alerts.push({ type:'warning', msg:`🏥 <strong>${a.full_name}</strong> vence el apto en ${days} días.` });
+    }
+  });
+  const container = document.getElementById('adminAlerts');
+  container.innerHTML = alerts.length
+    ? alerts.map(a => `<div class="alert alert-${a.type}">${a.msg}</div>`).join('')
+    : '<div class="alert alert-success">✅ Todo al día. No hay alertas urgentes.</div>';
+}
+
+function renderAlumnos() {
+  let list = allAlumnos;
+  if (alumnosFilter !== 'all') list = list.filter(a => a.payment_status === alumnosFilter);
+  if (alumnosSearch) list = list.filter(a => (a.full_name || '').toLowerCase().includes(alumnosSearch.toLowerCase()) || (a.email || '').toLowerCase().includes(alumnosSearch.toLowerCase()));
+
+  const tbody = document.getElementById('alumnosBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">No hay alumnos</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(a => {
+    const payInfo  = getPaymentBadge(a.payment_status);
+    const aptoInfo = getAptoStatus(a);
+    return `<tr>
+      <td>
+        <div class="td-name">${a.full_name || '—'}</div>
+        <div class="td-email">${a.dni ? 'DNI: ' + a.dni : ''}</div>
+      </td>
+      <td>${a.phone || '—'}</td>
+      <td>
+        <span class="badge ${payInfo.cls}">${payInfo.label}</span>
+        ${a.membership_end ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Hasta ${formatDate(a.membership_end)}</div>` : ''}
+      </td>
+      <td><span class="badge ${aptoInfo.cls}">${aptoInfo.label}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="viewAlumno('${a.id}')">Ver</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderClases() {
+  const tbody = document.getElementById('clasesBody');
+  if (!allAdminClases.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No hay clases configuradas. ¡Creá la primera!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allAdminClases.map(c => `
+    <tr>
+      <td>${getClassPill(c.class_types?.name || 'Clase')}</td>
+      <td>${DAYS[c.day_of_week] || '—'}</td>
+      <td>${c.start_time?.slice(0,5)} – ${c.end_time?.slice(0,5)}</td>
+      <td>${c.instructor || '—'}</td>
+      <td>${c.capacity}</td>
+      <td><span class="badge ${c.is_active ? 'badge-green' : 'badge-red'}">${c.is_active ? 'Activa' : 'Inactiva'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editClass('${c.id}')">Editar</button>
+        <button class="btn btn-sm" style="background:var(--rose-bg); color:var(--rose-dark); border:none; margin-left:4px;" onclick="toggleClassActive('${c.id}', ${c.is_active})">${c.is_active ? 'Pausar' : 'Activar'}</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderCobros() {
+  const paid     = allAlumnos.filter(a => a.payment_status === 'paid').length;
+  const pending  = allAlumnos.filter(a => a.payment_status === 'pending').length;
+  const overdue  = allAlumnos.filter(a => a.payment_status === 'overdue').length;
+  document.getElementById('cobSummary1').textContent = `✓ Al día: ${paid}`;
+  document.getElementById('cobSummary2').textContent = `⏳ Pendiente: ${pending}`;
+  document.getElementById('cobSummary3').textContent = `✕ Vencido: ${overdue}`;
+
+  const tbody = document.getElementById('cobrosBody');
+  if (!allAlumnos.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px;">Sin alumnos</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allAlumnos.map(a => {
+    const info = getPaymentBadge(a.payment_status);
+    return `<tr>
+      <td><div class="td-name">${a.full_name || '—'}</div></td>
+      <td class="td-email">${a.email || '—'}</td>
+      <td>${a.membership_end ? formatDate(a.membership_end) : '—'}</td>
+      <td><span class="badge ${info.cls}">${info.label}</span></td>
+      <td>
+        <select class="payment-select" onchange="updatePaymentStatus('${a.id}', this.value)">
+          <option value="paid"    ${a.payment_status === 'paid'    ? 'selected' : ''}>✓ Al día</option>
+          <option value="pending" ${a.payment_status === 'pending' ? 'selected' : ''}>⏳ Pendiente</option>
+          <option value="overdue" ${a.payment_status === 'overdue' ? 'selected' : ''}>✕ Vencido</option>
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function getPaymentBadge(status) {
+  if (status === 'paid')    return { label:'Al día',    cls:'badge-green'  };
+  if (status === 'overdue') return { label:'Vencido',   cls:'badge-red'    };
+  return                           { label:'Pendiente', cls:'badge-orange' };
+}
+
+function getAptoStatus(a) {
+  if (!a.apto_fisico_date) return { label:'Sin apto', cls:'badge-red' };
+  const end = new Date(a.apto_fisico_date);
+  end.setFullYear(end.getFullYear() + 1);
+  const days = daysUntil(end.toISOString().split('T')[0]);
+  if (days < 0)  return { label:'Vencido',   cls:'badge-red'    };
+  if (days <= 30) return { label:`${days}d`,  cls:'badge-orange' };
+  return                  { label:'Al día',   cls:'badge-green'  };
+}
+
+async function updatePaymentStatus(userId, status) {
+  const { error } = await supabase.from('profiles').update({ payment_status: status }).eq('id', userId);
+  if (error) showToast('Error al actualizar', 'error');
+  else {
+    showToast('Estado actualizado ✅', 'success');
+    const alumno = allAlumnos.find(a => a.id === userId);
+    if (alumno) alumno.payment_status = status;
+    renderDashboard();
+    renderCobros();
+  }
+}
+
+async function toggleClassActive(classId, current) {
+  await supabase.from('classes').update({ is_active: !current }).eq('id', classId);
+  await loadClases();
+  renderClases();
+  showToast(current ? 'Clase pausada' : 'Clase activada', 'success');
+}
+
+function filterAlumnos(search) {
+  alumnosSearch = search;
+  renderAlumnos();
+}
+
+function filterByStatus(status, btn) {
+  alumnosFilter = status;
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAlumnos();
+}
+
+function showPanel(name, link) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  link.classList.add('active');
+}
+
+function openClassModal(cls = null) {
+  document.getElementById('classId').value         = cls?.id || '';
+  document.getElementById('classModalTitle').textContent = cls ? 'Editar clase' : 'Nueva clase';
+  document.getElementById('classType').value       = cls?.class_types?.name || '';
+  document.getElementById('classDay').value        = cls?.day_of_week ?? '';
+  document.getElementById('classStart').value      = cls?.start_time?.slice(0,5) || '';
+  document.getElementById('classEnd').value        = cls?.end_time?.slice(0,5) || '';
+  document.getElementById('classInstructor').value = cls?.instructor || '';
+  document.getElementById('classCapacity').value   = cls?.capacity || 15;
+  document.getElementById('classModal').classList.add('open');
+}
+
+function closeClassModal() { document.getElementById('classModal').classList.remove('open'); }
+
+async function editClass(classId) {
+  const cls = allAdminClases.find(c => c.id === classId);
+  if (cls) openClassModal(cls);
+}
+
+async function saveClass(e) {
+  e.preventDefault();
+  const id         = document.getElementById('classId').value;
+  const typeName   = document.getElementById('classType').value;
+  const btn        = document.getElementById('classSubmitBtn');
+  btn.textContent  = 'Guardando...';
+  btn.disabled     = true;
+
+  // Get or create class type
+  let { data: typeData } = await supabase.from('class_types').select('id').eq('name', typeName).single();
+  if (!typeData) {
+    const { data: newType } = await supabase.from('class_types').insert({ name: typeName }).select().single();
+    typeData = newType;
+  }
+
+  const payload = {
+    class_type_id: typeData.id,
+    day_of_week:   parseInt(document.getElementById('classDay').value),
+    start_time:    document.getElementById('classStart').value,
+    end_time:      document.getElementById('classEnd').value,
+    instructor:    document.getElementById('classInstructor').value,
+    capacity:      parseInt(document.getElementById('classCapacity').value),
+    is_active:     true,
+  };
+
+  if (id) {
+    await supabase.from('classes').update(payload).eq('id', id);
+  } else {
+    await supabase.from('classes').insert(payload);
+  }
+
+  showToast(id ? 'Clase actualizada ✅' : 'Clase creada ✅', 'success');
+  closeClassModal();
+  await loadClases();
+  renderClases();
+  btn.textContent = 'Guardar clase';
+  btn.disabled    = false;
+}
+
+async function viewAlumno(id) {
+  const a = allAlumnos.find(x => x.id === id);
+  if (!a) return;
+  alert(`Alumno: ${a.full_name}\nDNI: ${a.dni || '—'}\nTel: ${a.phone || '—'}\nContacto emergencia: ${a.emergency_contact || '—'} ${a.emergency_phone || ''}\nApto físico: ${formatDate(a.apto_fisico_date)}\nCuota hasta: ${formatDate(a.membership_end)}`);
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+init();
+</script>
+</body>
+</html>

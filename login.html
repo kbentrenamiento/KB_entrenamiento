@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingresar / Registrarse — KB Entrenamiento</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--green-bg) 0%, var(--rose-bg) 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 16px;
+    }
+    .auth-card {
+      background: var(--white); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); width: 100%; max-width: 520px;
+      overflow: hidden;
+    }
+    .auth-tabs {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-bottom: 2px solid var(--cream);
+    }
+    .auth-tab {
+      padding: 18px; text-align: center; font-weight: 700; font-size: 0.95rem;
+      cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+      background: none; border: none; font-family: var(--font-body);
+    }
+    .auth-tab.active { color: var(--green-dark); border-bottom: 3px solid var(--green); margin-bottom: -2px; }
+    .auth-body { padding: 36px; }
+    .auth-logo { text-align: center; margin-bottom: 28px; }
+    .auth-logo .nav-logo { justify-content: center; margin-bottom: 8px; }
+    .auth-logo p { font-size: 0.9rem; color: var(--text-muted); }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+    .divider { text-align: center; margin: 20px 0; position: relative; color: var(--text-muted); font-size: 0.85rem; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--beige); }
+    .divider::before { left: 0; }
+    .divider::after  { right: 0; }
+    .register-sections { display: flex; flex-direction: column; gap: 28px; }
+    .register-section-title {
+      font-family: var(--font-heading); font-size: 1rem; color: var(--green-dark);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .file-upload-area {
+      border: 2px dashed var(--beige); border-radius: var(--radius-sm);
+      padding: 24px; text-align: center; cursor: pointer;
+      transition: all 0.2s; background: var(--cream);
+    }
+    .file-upload-area:hover { border-color: var(--green); background: var(--green-bg); }
+    .file-upload-area.has-file { border-color: var(--green); background: var(--green-bg); }
+    .file-upload-area .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .file-upload-area p { font-size: 0.85rem; margin-bottom: 0; }
+    .file-upload-area input[type="file"] { display: none; }
+    .terms-check { display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; cursor: pointer; color: var(--text-light); }
+    .terms-check input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--green); flex-shrink: 0; }
+    .forgot-link { text-align: right; margin-bottom: 20px; }
+    .forgot-link a { font-size: 0.85rem; color: var(--rose); font-weight: 600; }
+    .forgot-link a:hover { text-decoration: underline; }
+    #loginForm .btn, #registerForm .btn { width: 100%; justify-content: center; }
+    .step-indicator { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--beige); transition: all 0.3s; }
+    .step-dot.active { background: var(--green); width: 24px; border-radius: 4px; }
+    .step-dot.done  { background: var(--green-light); }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .step-nav { display: flex; gap: 12px; margin-top: 24px; }
+    .step-nav .btn { flex: 1; justify-content: center; }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo" style="padding:28px 28px 0;">
+      <div class="nav-logo" style="justify-content:center;">
+        <div class="nav-logo-icon">🌿</div>
+        <span class="nav-logo-text">KB <span>Entrenamiento</span></span>
+      </div>
+      <p>Tu bienestar empieza aquí</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')" id="tabLogin">Ingresar</button>
+      <button class="auth-tab" onclick="switchTab('registro')" id="tabRegistro">Registrarse</button>
+    </div>
+
+    <div class="auth-body">
+
+      <!-- ===== LOGIN ===== -->
+      <div class="auth-panel active" id="panelLogin">
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" required placeholder="tu@email.com" />
+          </div>
+          <div class="form-group">
+            <label for="loginPass">Contraseña</label>
+            <input type="password" id="loginPass" required placeholder="••••••••" />
+          </div>
+          <div class="forgot-link"><a href="#" onclick="handleForgotPassword()">¿Olvidaste tu contraseña?</a></div>
+          <button type="submit" class="btn btn-primary btn-lg" id="loginBtn">
+            <span id="loginBtnText">Ingresar</span>
+          </button>
+        </form>
+        <div class="divider">o</div>
+        <p style="text-align:center; font-size:0.9rem; color:var(--text-muted);">
+          ¿No tenés cuenta?
+          <a href="#" onclick="switchTab('registro')" style="color:var(--rose); font-weight:700;">Registrate acá</a>
+        </p>
+      </div>
+
+      <!-- ===== REGISTRO ===== -->
+      <div class="auth-panel" id="panelRegistro">
+        <div class="step-indicator" id="stepIndicator">
+          <div class="step-dot active" id="dot0"></div>
+          <div class="step-dot" id="dot1"></div>
+          <div class="step-dot" id="dot2"></div>
+        </div>
+
+        <form id="registerForm" onsubmit="handleRegister(event)">
+
+          <!-- STEP 1: Datos de cuenta -->
+          <div class="step-panel active" id="step0">
+            <div class="register-section-title">🔐 Datos de acceso</div>
+            <div class="form-group">
+              <label for="regEmail">Email</label>
+              <input type="email" id="regEmail" required placeholder="tu@email.com" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regPass">Contraseña</label>
+                <input type="password" id="regPass" required placeholder="Mínimo 6 caracteres" minlength="6" />
+              </div>
+              <div class="form-group">
+                <label for="regPass2">Confirmar contraseña</label>
+                <input type="password" id="regPass2" required placeholder="Repetí tu contraseña" />
+              </div>
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn btn-primary" onclick="goToStep(1)">Siguiente →</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Datos personales -->
+          <div class="step-panel" id="step1">
+            <div class="register-section-title">👤 Datos personales</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regNombre">Nombre</label>
+                <input type="text" id="regNombre" required placeholder="Tu nombre" />
+              </div>
+              <div class="form-group">
+                <label for="regApellido">Apellido</label>
+                <input type="text" id="regApellido" required placeholder="Tu apellido" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regDNI">DNI</label>
+                <input type="text" id="regDNI" placeholder="12.345.678" />
+              </div>
+              <div class="form-group">
+                <label for="regTel">Teléfono</label>
+                <input type="tel" id="regTel" placeholder="11 1234-5678" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regNac">Fecha de nacimiento</label>
+                <input type="date" id="regNac" />
+              </div>
+              <div class="form-group">
+                <label for="regDir">Dirección</label>
+                <input type="text" id="regDir" placeholder="Calle 123, Quilmes" />
+              </div>
+            </div>
+            <div class="register-section-title" style="margin-top:8px;">🚨 Contacto de emergencia</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regEmergNombre">Nombre y apellido</label>
+                <input type="text" id="regEmergNombre" placeholder="Familiar o amigo/a" />
+              </div>
+              <div class="form-group">
+                <label for="regEmergTel">Teléfono</label>
+                <input type="tel" id="regEmergTel" placeholder="11 1234-5678" />
+              </div>
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn btn-outline" onclick="goToStep(0)">← Atrás</button>
+              <button type="button" class="btn btn-primary" onclick="goToStep(2)">Siguiente →</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Apto físico -->
+          <div class="step-panel" id="step2">
+            <div class="register-section-title">🏥 Apto físico</div>
+            <p style="font-size:0.9rem; margin-bottom:20px;">Subí tu certificado médico de aptitud física. Recordá que tiene validez de <strong>1 año</strong>. Te avisaremos cuando esté por vencer.</p>
+            <div class="form-group">
+              <label for="regAptoDate">Fecha del apto físico</label>
+              <input type="date" id="regAptoDate" />
+            </div>
+            <div class="file-upload-area" onclick="document.getElementById('regAptoFile').click()" id="uploadArea">
+              <div class="upload-icon">📄</div>
+              <p><strong>Hacé clic para subir</strong> el certificado</p>
+              <p style="color:var(--text-muted);">PDF, JPG o PNG — máx. 5MB</p>
+              <input type="file" id="regAptoFile" accept=".pdf,.jpg,.jpeg,.png" onchange="onFileSelected(this)" />
+            </div>
+            <p id="fileName" style="font-size:0.85rem; color:var(--green-dark); margin-top:8px; display:none;"></p>
+            <div style="margin-top:16px;">
+              <label class="terms-check">
+                <input type="checkbox" id="regTerms" required />
+                <span>Acepto los términos y condiciones y autorizo el uso de mis datos con fines de gestión del gimnasio.</span>
+              </label>
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn btn-outline" onclick="goToStep(1)">← Atrás</button>
+              <button type="submit" class="btn btn-secondary" id="registerBtn">
+                <span id="registerBtnText">Crear cuenta ♥</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div><!-- /panelRegistro -->
+
+    </div><!-- /auth-body -->
+  </div><!-- /auth-card -->
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+  let currentStep = 0;
+  let aptoFile = null;
+
+  // Check if arriving at #registro hash
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.location.hash === '#registro') switchTab('registro');
+  });
+
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+    if (tab === 'login') {
+      document.getElementById('tabLogin').classList.add('active');
+      document.getElementById('panelLogin').classList.add('active');
+    } else {
+      document.getElementById('tabRegistro').classList.add('active');
+      document.getElementById('panelRegistro').classList.add('active');
+      history.replaceState(null, '', '#registro');
+    }
+  }
+
+  function goToStep(n) {
+    if (n > currentStep) {
+      if (!validateStep(currentStep)) return;
+    }
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.getElementById('dot' + currentStep).classList.remove('active');
+    document.getElementById('dot' + currentStep).classList.add('done');
+    if (n < currentStep) {
+      document.getElementById('dot' + n).classList.remove('done');
+    }
+    currentStep = n;
+    document.getElementById('step' + currentStep).classList.add('active');
+    document.getElementById('dot' + currentStep).classList.add('active');
+  }
+
+  function validateStep(step) {
+    if (step === 0) {
+      const email = document.getElementById('regEmail').value;
+      const pass  = document.getElementById('regPass').value;
+      const pass2 = document.getElementById('regPass2').value;
+      if (!email || !pass) { showToast('Completá email y contraseña', 'error'); return false; }
+      if (pass.length < 6) { showToast('La contraseña debe tener al menos 6 caracteres', 'error'); return false; }
+      if (pass !== pass2) { showToast('Las contraseñas no coinciden', 'error'); return false; }
+    }
+    if (step === 1) {
+      const nombre   = document.getElementById('regNombre').value;
+      const apellido = document.getElementById('regApellido').value;
+      if (!nombre || !apellido) { showToast('Completá nombre y apellido', 'error'); return false; }
+    }
+    return true;
+  }
+
+  function onFileSelected(input) {
+    if (input.files[0]) {
+      aptoFile = input.files[0];
+      const area = document.getElementById('uploadArea');
+      area.classList.add('has-file');
+      area.querySelector('.upload-icon').textContent = '✅';
+      const fn = document.getElementById('fileName');
+      fn.textContent = '📎 ' + aptoFile.name;
+      fn.style.display = 'block';
+    }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn  = document.getElementById('loginBtn');
+    const text = document.getElementById('loginBtnText');
+    btn.disabled = true;
+    text.textContent = 'Ingresando...';
+
+    const email = document.getElementById('loginEmail').value;
+    const pass  = document.getElementById('loginPass').value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+
+    if (error) {
+      showToast('Email o contraseña incorrectos', 'error');
+      btn.disabled = false;
+      text.textContent = 'Ingresar';
+      return;
+    }
+
+    // Check if admin
+    const profile = await getUserProfile(data.user.id);
+    showToast('¡Bienvenida! 🌿', 'success');
+    setTimeout(() => {
+      window.location.href = profile?.is_admin ? 'admin.html' : 'perfil.html';
+    }, 1000);
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    if (!document.getElementById('regTerms').checked) {
+      showToast('Aceptá los términos para continuar', 'error');
+      return;
+    }
+
+    const btn  = document.getElementById('registerBtn');
+    const text = document.getElementById('registerBtnText');
+    btn.disabled = true;
+    text.textContent = 'Creando cuenta...';
+
+    const email    = document.getElementById('regEmail').value;
+    const pass     = document.getElementById('regPass').value;
+    const nombre   = document.getElementById('regNombre').value;
+    const apellido = document.getElementById('regApellido').value;
+    const dni      = document.getElementById('regDNI').value;
+    const tel      = document.getElementById('regTel').value;
+    const nac      = document.getElementById('regNac').value;
+    const dir      = document.getElementById('regDir').value;
+    const emergN   = document.getElementById('regEmergNombre').value;
+    const emergT   = document.getElementById('regEmergTel').value;
+    const aptoDate = document.getElementById('regAptoDate').value;
+
+    // 1. Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email, password: pass,
+      options: { data: { full_name: nombre + ' ' + apellido } }
+    });
+
+    if (authError) {
+      showToast(authError.message, 'error');
+      btn.disabled = false; text.textContent = 'Crear cuenta ♥';
+      return;
+    }
+
+    const userId = authData.user.id;
+    let aptoUrl = null;
+
+    // 2. Upload apto físico if provided
+    if (aptoFile) {
+      const ext  = aptoFile.name.split('.').pop();
+      const path = `aptos/${userId}/apto.${ext}`;
+      const { error: upErr } = await supabase.storage.from('aptos').upload(path, aptoFile, { upsert: true });
+      if (!upErr) {
+        const { data: urlData } = supabase.storage.from('aptos').getPublicUrl(path);
+        aptoUrl = urlData.publicUrl;
+      }
+    }
+
+    // 3. Create profile
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id:                userId,
+      full_name:         nombre + ' ' + apellido,
+      dni,
+      phone:             tel,
+      birth_date:        nac || null,
+      address:           dir,
+      emergency_contact: emergN,
+      emergency_phone:   emergT,
+      is_admin:          false,
+      membership_start:  new Date().toISOString().split('T')[0],
+      apto_fisico_date:  aptoDate || null,
+      apto_fisico_url:   aptoUrl,
+      payment_status:    'pending'
+    });
+
+    if (profileError) {
+      showToast('Error al guardar el perfil: ' + profileError.message, 'error');
+      btn.disabled = false; text.textContent = 'Crear cuenta ♥';
+      return;
+    }
+
+    showToast('¡Cuenta creada! Revisá tu email para confirmar. 🌿', 'success');
+    setTimeout(() => window.location.href = 'perfil.html', 2000);
+  }
+
+  async function handleForgotPassword() {
+    const email = document.getElementById('loginEmail').value;
+    if (!email) { showToast('Ingresá tu email primero', 'info'); return; }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if (error) showToast('Error: ' + error.message, 'error');
+    else showToast('Te enviamos un email para recuperar tu contraseña', 'success');
+  }
+</script>
+</body>
+</html>
